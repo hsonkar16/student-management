@@ -1,17 +1,13 @@
 {
   "name": "student-management",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "My first database-backed student management system",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
-    "express": "^5.2.1"
+    "better-sqlite3": "...",
+    "express": "..."
   }
 }

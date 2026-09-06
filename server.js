@@ -1,89 +1,129 @@
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
-const Database = require("better-sqlite3");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to SQLite database
-const db = new Database("students.db");
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
-// Create table
-db.prepare(`
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        roll_no TEXT NOT NULL,
-        name TEXT NOT NULL,
-        course TEXT NOT NULL
-    )
-`).run();
-
+// Middleware
 app.use(express.json());
-
-// Serve frontend
 app.use(express.static(path.join(__dirname)));
 
+// Create students table
+async function initDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS students (
+      id SERIAL PRIMARY KEY,
+      roll_no TEXT NOT NULL,
+      name TEXT NOT NULL,
+      course TEXT NOT NULL
+    )
+  `);
+
+  console.log("PostgreSQL database connected.");
+  console.log("Students table is ready.");
+}
+
+// Test API
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "API is working with PostgreSQL"
+  });
+});
+
 // Get all students
-app.get("/api/students", (req, res) => {
+app.get("/api/students", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, roll_no, name, course
+      FROM students
+      ORDER BY id DESC
+    `);
 
-    const students = db.prepare(`
-        SELECT * FROM students
-        ORDER BY id DESC
-    `).all();
-
-    res.json(students);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({
+      error: "Failed to fetch students"
+    });
+  }
 });
 
 // Add student
-app.post("/api/students", (req, res) => {
+app.post("/api/students", async (req, res) => {
+  try {
+    const { roll_no, name, course } = req.body;
 
-    const { rollNo, name, course } = req.body;
-
-    if (!rollNo || !name || !course) {
-        return res.status(400).json({
-            error: "All fields are required"
-        });
+    if (!roll_no || !name || !course) {
+      return res.status(400).json({
+        error: "Roll No, Name and Course are required"
+      });
     }
 
-    const result = db.prepare(`
-        INSERT INTO students (roll_no, name, course)
-        VALUES (?, ?, ?)
-    `).run(rollNo, name, course);
+    const result = await pool.query(
+      `
+      INSERT INTO students (roll_no, name, course)
+      VALUES ($1, $2, $3)
+      RETURNING id, roll_no, name, course
+      `,
+      [roll_no, name, course]
+    );
 
-    const student = db.prepare(`
-        SELECT * FROM students
-        WHERE id = ?
-    `).get(result.lastInsertRowid);
-
-    res.json(student);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error adding student:", error);
+    res.status(500).json({
+      error: "Failed to add student"
+    });
+  }
 });
 
 // Delete student
-app.delete("/api/students/:id", (req, res) => {
+app.delete("/api/students/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    const id = req.params.id;
+    const result = await pool.query(
+      "DELETE FROM students WHERE id = $1 RETURNING id",
+      [id]
+    );
 
-    db.prepare(`
-        DELETE FROM students
-        WHERE id = ?
-    `).run(id);
-
-    res.json({
-        message: "Student deleted successfully"
-    });
-});
-
-// Test
-app.get("/api/test", (req, res) => {
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: "Student not found"
+      });
+    }
 
     res.json({
-        message: "Backend and database are working!"
+      message: "Student deleted successfully"
     });
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    res.status(500).json({
+      error: "Failed to delete student"
+    });
+  }
 });
 
-// Start server
-app.listen(PORT, () => {
-
-    console.log(`Server running at http://localhost:${PORT}`);
-
-});
+// Start server only after database is ready
+initDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Database connection failed:");
+    console.error(error);
+    process.exit(1);
+  });

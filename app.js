@@ -49,7 +49,7 @@ async function addStudent() {
 
         body: JSON.stringify({
             name: name,
-            rollNo: rollNo,
+            roll_no: rollNo,
             course: course
         })
     });

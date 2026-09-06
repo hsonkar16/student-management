@@ -1,13 +1,26 @@
 {
   "name": "student-management",
   "version": "1.0.0",
-  "description": "My first database-backed student management system",
-  "main": "server.js",
+  "description": "",
+  "main": "app.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsonkar16/student-management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hsonkar16/student-management/issues"
+  },
+  "homepage": "https://github.com/hsonkar16/student-management#readme",
   "dependencies": {
-    "better-sqlite3": "...",
-    "express": "..."
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
   }
 }

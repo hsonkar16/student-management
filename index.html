@@ -1,50 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Student Management System</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #1e3a8a;
+            color: white;
+            padding: 25px 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .header p {
+            margin: 7px 0 0;
+            opacity: 0.85;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+        }
+
+        .add-button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .add-button:hover {
+            background: #1d4ed8;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .student-count {
+            background: #e8f0ff;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #374151;
+            font-size: 13px;
+            text-align: left;
+            padding: 14px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #f9fafb;
+        }
+
+        .delete-button {
+            border: none;
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .delete-button:hover {
+            background: #fecaca;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        @media (max-width: 800px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .add-button {
+                width: 100%;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                margin-top: 20px;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <div class="container">
+    <header class="header">
 
-        <h1>Student Management System</h1>
+        <div class="header-content">
 
-        <div class="form-box">
+            <h1>🎓 Student Management System</h1>
 
-            <input type="text" id="studentName" placeholder="Student Name">
-
-            <input type="text" id="rollNo" placeholder="Roll Number">
-
-            <input type="text" id="course" placeholder="Course">
-
-            <button onclick="addStudent()">Add Student</button>
+            <p>
+                Manage student records quickly and easily
+            </p>
 
         </div>
 
-        <h2>Student List</h2>
+    </header>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Roll No</th>
-                    <th>Name</th>
-                    <th>Course</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
 
-            <tbody id="studentTable">
-            </tbody>
-        </table>
+    <main class="container">
 
-    </div>
+
+        <!-- Add Student -->
+
+        <div class="card">
+
+            <div class="card-title">
+                Add New Student
+            </div>
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label for="studentName">
+                        Student Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="studentName"
+                        placeholder="Enter student name"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="rollNo">
+                        Roll Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="rollNo"
+                        placeholder="Enter roll number"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="course">
+                        Course
+                    </label>
+
+                    <input
+                        type="text"
+                        id="course"
+                        placeholder="Enter course"
+                    >
+
+                </div>
+
+
+                <button
+                    class="add-button"
+                    onclick="addStudent()"
+                >
+                    + Add Student
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- Student List -->
+
+        <div class="card">
+
+            <div class="table-header">
+
+                <div class="card-title"
+                     style="margin: 0;">
+                    Student List
+                </div>
+
+                <div class="student-count">
+                    Students
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Roll No</th>
+
+                            <th>Name</th>
+
+                            <th>Course</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="studentTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="footer">
+
+        Student Management System
+
+    </footer>
+
 
     <script src="app.js"></script>
 
 </body>
+
 </html>
